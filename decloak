@@ -1,0 +1,68 @@
+#! /usr/bin/env bash
+
+## Decodes an Authorization HTTP header.
+##
+## author: torstein at skybert dot net
+
+set -o nounset
+set -o pipefail
+
+me=$(basename "$0")
+
+ensure_sanity_jwt() {
+  command -v jq > /dev/null || { echo "jq is required"; exit 1; }
+  command -v base64 > /dev/null || { echo "jq is required"; exit 1; }
+}
+
+print_usage() {
+  cat <<EOF
+${me} - Decode an Authorization HTTP header.
+
+Usage:
+   ${me} <HTTP Authorization header>
+   or
+   echo <HTTP Authorization header> | ${me}
+EOF
+}
+
+timestamp_to_date() {
+  local ts=$1
+  LC_ALL=C date -d @"${ts}"
+}
+
+
+main() {
+  if [ $# -gt 0 ]; then
+    input=$*
+  elif [ -p /dev/stdin ]; then
+    input=$(cat -)
+  fi
+
+  test -n "${input:-""}" || { print_usage; exit 2; }
+
+  s=$(
+    printf "%s\\n" "${input}" |
+      sed 's#.*Basic ##I' |
+      sed 's#.*Bearer ##I')
+
+  if [ "${s:0:2}" != "ey" ]; then
+    d=$(printf "%s" "${s}" | base64 -d -)
+    printf "%s\\n" "${d}"
+  else
+    ensure_sanity_jwt
+    IFS=. read header payload ignore_signature <<< "${s}"
+    printf "%s\\n" "${header}" | base64 -d - | jq
+    body=$(printf "%s\\n" "${payload}" | base64 -d - | jq -r)
+    printf "%s\\n" "${body}" | jq
+    iat=$(printf "%s\\n" "${body}" | jq -r .iat)
+    exp=$(printf "%s\\n" "${body}" | jq -r .exp)
+    printf "iat: %s\\n" "$(timestamp_to_date "${iat}")"
+    printf "exp: %s\\n" "$(timestamp_to_date "${exp}")"
+  fi
+}
+
+main "$@"
+
+# Tests
+# main Authorization: Basic Zm9vOmh1bnRlcjI=
+# main Authorization: Bearer ey..
