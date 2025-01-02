@@ -25,20 +25,19 @@ $ decloak eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6IjMxYzliNV9mNjJkZ
 ```
 ```json
 {
-  "alg": "HS256",
-  "typ": "JWT"
-}
-{
-  "video_id": "31c23_f62df34234adfs",
-  "is_clip": false,
-  "iat": 1733144400,
-  "exp": 1733230800,
-  "iss": "app:vod",
-  "sub": "user:vod"
+  "header": {
+    "alg": "HS256",
+    "typ": "JWT"
+  },
+  "body": {
+    "video_id": "31c23_f62df34234adfs",
+    "is_clip": false,
+    "iat": 1733144400,
+    "exp": 1733230800,
+    "iss": "app:vod",
+    "sub": "user:vod"
+  },
+  "iat": "Mon Dec  2 14:00:00 CET 2024",
+  "exp": "Tue Dec  3 14:00:00 CET 2024"
 }
 ```
-```text
-iat: Mon Dec  2 14:00:00 CET 2024
-exp: Tue Dec  3 14:00:00 CET 2024
-```
-
