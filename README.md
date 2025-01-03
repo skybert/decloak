@@ -6,8 +6,7 @@ Unix command that decloaks an HTTP Authorization header.
 - Decodes and prints the user and password
 - If a Bearer token is used instead of Basic auth, the JWT is decoded
   and the header and payload is pretty printed
-
-The `exp` and `iat` timestamp fields are converted to human dates.
+- The `exp` and `iat` timestamp fields are converted to human dates.
 
 ## Example usage
 
