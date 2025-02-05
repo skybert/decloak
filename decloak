@@ -56,7 +56,9 @@ main() {
       sed 's#.*Basic ##I' |
       sed 's#.*Bearer ##I')
 
-  if [ "${s:0:2}" != "ey" ]; then
+  if [[ "${s:0:7}" == "http://" || "${s:0:8}" == "https://" ]]; then
+    printf '%b\n' "${s//%/\\x}"
+  elif [ "${s:0:2}" != "ey" ]; then
     d=$(printf "%s" "${s}" | base64 -d -)
     printf "%s\\n" "${d}"
   else

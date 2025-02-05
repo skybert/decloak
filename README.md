@@ -40,3 +40,9 @@ $ decloak eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlb19pZCI6IjMxYzliNV9mNjJkZ
   "exp": "Tue Dec  3 14:00:00 CET 2024"
 }
 ```
+
+`decloak` can also decode URI encoded strings, e.g.:
+```perl
+$ decloak http://example.com?var=%2F
+http://example.com?var=/
+```
