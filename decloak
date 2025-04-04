@@ -37,7 +37,8 @@ create_json() {
   "header": ${header},
   "body": ${body},
   "iat": "${iat}",
-  "exp": "${exp}"
+  "exp": "${exp}",
+  "now": "$(LC_ALL=C date)"
 }
 EOF
 }
