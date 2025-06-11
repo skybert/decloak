@@ -9,9 +9,15 @@ set -o pipefail
 
 me=$(basename "$0")
 
+base64=base64
+date=date
+
 ensure_sanity_jwt() {
+  test -x /opt/homebrew/bin/gbase64 && export base64=gbase64
+  test -x /opt/homebrew/bin/gdate && export date=gdate
+
   command -v jq > /dev/null || { echo "jq is required"; exit 1; }
-  command -v base64 > /dev/null || { echo "jq is required"; exit 1; }
+  command -v "${base64}" > /dev/null || { echo "GNU base64 is required"; exit 1; }
 }
 
 print_usage() {
@@ -27,7 +33,7 @@ EOF
 
 timestamp_to_date() {
   local ts=$1
-  LC_ALL=C date -d @"${ts}"
+  LC_ALL=C "${date}" -d @"${ts}"
 }
 
 
@@ -38,7 +44,7 @@ create_json() {
   "body": ${body},
   "iat": "${iat}",
   "exp": "${exp}",
-  "now": "$(LC_ALL=C date)"
+  "now": "$(LC_ALL=C "${date}")"
 }
 EOF
 }
@@ -60,13 +66,13 @@ main() {
   if [[ "${s:0:7}" == "http://" || "${s:0:8}" == "https://" ]]; then
     printf '%b\n' "${s//%/\\x}"
   elif [ "${s:0:2}" != "ey" ]; then
-    d=$(printf "%s" "${s}" | base64 -d -)
+    d=$(printf "%s" "${s}" | "${base64}" -d -)
     printf "%s\\n" "${d}"
   else
     ensure_sanity_jwt
     IFS=. read header payload ignore_signature <<< "${s}"
-    header=$(printf "%s\\n" "${header}" | base64 -d - | jq -r)
-    body=$(printf "%s\\n" "${payload}" | base64 -d - | jq -r)
+    header=$(printf "%s\\n" "${header}" | "${base64}" -d - | jq -r)
+    body=$(printf "%s\\n" "${payload}" | "${base64}" -d - | jq -r)
     iat=$(printf "%s\\n" "${body}" | jq -r .iat)
     exp=$(printf "%s\\n" "${body}" | jq -r .exp)
     iat=$(timestamp_to_date "${iat}")
